@@ -1,40 +1,35 @@
 package net.darkhax.betterburning;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.AbstractSkeletonEntity;
-import net.minecraft.entity.monster.ZombieEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.AbstractSkeleton;
+import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Items;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.potion.Effects;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig.Type;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Mod("betterburning")
+@Mod(modid = "betterburning", name = "Better Burning", version = "@VERSION@", certificateFingerprint = "@FINGERPRINT@")
 public class BetterBurning {
     
-    private final Configuration configuration = new Configuration();
+    private final Config configuration = new Config();
     
     public BetterBurning() {
         
-        ModLoadingContext.get().registerConfig(Type.COMMON, this.configuration.getSpec());
-        
-        MinecraftForge.EVENT_BUS.addListener(this::onLivingDeath);
-        MinecraftForge.EVENT_BUS.addListener(this::onEntityJoinWorld);
-        MinecraftForge.EVENT_BUS.addListener(this::onLivingTick);
-        MinecraftForge.EVENT_BUS.addListener(this::onLivingAttack);
+    	MinecraftForge.EVENT_BUS.register(this);
     }
     
-    private void onLivingDeath (LivingDeathEvent event) {
+    @SubscribeEvent
+    public void onLivingDeath (LivingDeathEvent event) {
         
         // Fixes some edge cases where fire damage sources won't cause mobs to drop their
         // cooked items.
@@ -44,43 +39,46 @@ public class BetterBurning {
         }
     }
     
-    private void onEntityJoinWorld (EntityJoinWorldEvent event) {
+    @SubscribeEvent
+    public void onEntityJoinWorld (EntityJoinWorldEvent event) {
         
         // Allows skeletons to shoot flaming arrows when they are on fire.
-        if (this.configuration.shouldSkeletonsShootFireArrows() && event.getEntity() instanceof ArrowEntity && !event.getEntity().world.isRemote) {
+        if (this.configuration.shouldSkeletonsShootFireArrows() && event.getEntity() instanceof EntityArrow && !event.getEntity().world.isRemote) {
             
-            final ArrowEntity arrowEntity = (ArrowEntity) event.getEntity();
-            final Entity shooter = arrowEntity.getShooter();
+            final EntityArrow arrowEntity = (EntityArrow) event.getEntity();
+            final Entity shooter = arrowEntity.shootingEntity;
             
-            if (shooter instanceof AbstractSkeletonEntity && shooter.isBurning() && shooter.isAlive() && this.tryPercentage(this.configuration.getSkeletonFlameArrowChance())) {
+            if (shooter instanceof AbstractSkeleton && shooter.isBurning() && !shooter.isDead && this.tryPercentage(this.configuration.getSkeletonFlameArrowChance())) {
                 
-                arrowEntity.setFire(shooter.getFireTimer());
+                arrowEntity.setFire(100);
             }
         }
     }
     
-    private void onLivingTick (LivingUpdateEvent event) {
+    @SubscribeEvent
+    public void onLivingTick (LivingUpdateEvent event) {
         
         // If entity has fire resistance it will extinguish them right away when on fire.
-        if (this.configuration.shouldFireResExtinguish() && !event.getEntityLiving().world.isRemote && event.getEntityLiving().isBurning() && event.getEntityLiving().isPotionActive(Effects.FIRE_RESISTANCE)) {
+        if (this.configuration.shouldFireResExtinguish() && !event.getEntityLiving().world.isRemote && event.getEntityLiving().isBurning() && event.getEntityLiving().isPotionActive(MobEffects.FIRE_RESISTANCE)) {
             
             event.getEntityLiving().extinguish();
         }
     }
     
-    private void onLivingAttack (LivingAttackEvent event) {
+    @SubscribeEvent
+    public void onLivingAttack (LivingAttackEvent event) {
         
         if (this.configuration.shouldFireDamageSpread() && !event.getEntity().world.isRemote) {
             
             final Entity sourceEntity = event.getSource().getTrueSource();
             
-            if (sourceEntity instanceof LivingEntity) {
+            if (sourceEntity instanceof EntityLivingBase) {
                 
-                final LivingEntity sourceLiving = (LivingEntity) sourceEntity;
+                final EntityLivingBase sourceLiving = (EntityLivingBase) sourceEntity;
                 final ItemStack heldItem = sourceLiving.getHeldItemMainhand();
                 
                 // Allows fire damage to spread from entity to entity
-                if (!(sourceLiving instanceof ZombieEntity) && heldItem.isEmpty() && sourceLiving.isBurning() && this.tryPercentage(this.configuration.getFireDamageSpreadChance())) {
+                if (!(sourceLiving instanceof EntityZombie) && heldItem.isEmpty() && sourceLiving.isBurning() && this.tryPercentage(this.configuration.getFireDamageSpreadChance())) {
                     
                     final float damage = Math.max(1, event.getEntityLiving().world.getDifficultyForLocation(new BlockPos(event.getEntity())).getAdditionalDifficulty());
                     event.getEntityLiving().setFire(2 * (int) damage);
@@ -90,7 +88,7 @@ public class BetterBurning {
                 else if (heldItem.getItem() == Items.FLINT_AND_STEEL && this.configuration.shouldFlintAndSteelDoFireDamage()) {
                     
                     event.getEntityLiving().setFire(this.configuration.getFlintAndSteelFireDamage());
-                    final ServerPlayerEntity player = sourceLiving instanceof ServerPlayerEntity ? (ServerPlayerEntity) sourceLiving : null;
+                    final EntityPlayerMP player = sourceLiving instanceof EntityPlayerMP ? (EntityPlayerMP) sourceLiving : null;
                     heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player);
                 }
             }
