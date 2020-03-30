@@ -2,7 +2,7 @@ package net.darkhax.betterburning;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.AbstractSkeleton;
+import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
@@ -47,7 +47,7 @@ public class BetterBurning {
             final EntityArrow arrowEntity = (EntityArrow) event.getEntity();
             final Entity shooter = arrowEntity.shootingEntity;
             
-            if (shooter instanceof AbstractSkeleton && shooter.isBurning() && !shooter.isDead && this.tryPercentage(this.configuration.getSkeletonFlameArrowChance())) {
+            if (shooter instanceof EntitySkeleton && shooter.isBurning() && !shooter.isDead && this.tryPercentage(this.configuration.getSkeletonFlameArrowChance())) {
                 
                 arrowEntity.setFire(100);
             }
@@ -69,7 +69,7 @@ public class BetterBurning {
         
         if (this.configuration.shouldFireDamageSpread() && !event.getEntity().world.isRemote) {
             
-            final Entity sourceEntity = event.getSource().getTrueSource();
+            final Entity sourceEntity = event.getSource().getEntity();
             
             if (sourceEntity instanceof EntityLivingBase) {
                 
@@ -77,14 +77,14 @@ public class BetterBurning {
                 final ItemStack heldItem = sourceLiving.getHeldItemMainhand();
                 
                 // Allows fire damage to spread from entity to entity
-                if (!(sourceLiving instanceof EntityZombie) && heldItem.isEmpty() && sourceLiving.isBurning() && this.tryPercentage(this.configuration.getFireDamageSpreadChance())) {
+                if (!(sourceLiving instanceof EntityZombie) && heldItem == null && sourceLiving.isBurning() && this.tryPercentage(this.configuration.getFireDamageSpreadChance())) {
                     
                     final float damage = Math.max(1, event.getEntityLiving().world.getDifficultyForLocation(new BlockPos(event.getEntity())).getAdditionalDifficulty());
                     event.getEntityLiving().setFire(2 * (int) damage);
                 }
                 
                 // Allows flint and steel to do fire damage to mobs
-                else if (heldItem.getItem() == Items.FLINT_AND_STEEL && this.configuration.shouldFlintAndSteelDoFireDamage()) {
+                else if (heldItem != null && heldItem.getItem() == Items.FLINT_AND_STEEL && this.configuration.shouldFlintAndSteelDoFireDamage()) {
                     
                     event.getEntityLiving().setFire(this.configuration.getFlintAndSteelFireDamage());
                     heldItem.attemptDamageItem(1, sourceLiving.getRNG());
