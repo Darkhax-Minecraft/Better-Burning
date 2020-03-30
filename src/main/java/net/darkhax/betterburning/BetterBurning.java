@@ -1,5 +1,7 @@
 package net.darkhax.betterburning;
 
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntitySkeleton;
@@ -8,16 +10,13 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
-import net.minecraft.util.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Mod(modid = "betterburning", name = "Better Burning", version = "@VERSION@", certificateFingerprint = "@FINGERPRINT@")
+@Mod(modid = "betterburning", name = "Better Burning", version = "@VERSION@")
 public class BetterBurning {
     
     private final Config configuration = new Config();
@@ -79,7 +78,7 @@ public class BetterBurning {
                 // Allows fire damage to spread from entity to entity
                 if (!(sourceLiving instanceof EntityZombie) && heldItem == null && sourceLiving.isBurning() && this.tryPercentage(this.configuration.getFireDamageSpreadChance())) {
                     
-                    final float damage = Math.max(1, event.entityLiving.worldObj.getDifficultyForLocation(new BlockPos(event.entity)).getAdditionalDifficulty());
+                    final float damage = Math.max(1, event.entityLiving.worldObj.func_147462_b(event.entity.posX, event.entity.posY, event.entity.posZ));
                     event.entityLiving.setFire(2 * (int) damage);
                 }
                 
