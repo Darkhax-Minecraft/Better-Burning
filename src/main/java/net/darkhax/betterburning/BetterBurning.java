@@ -32,7 +32,7 @@ public class BetterBurning {
         
         // Fixes some edge cases where fire damage sources won't cause mobs to drop their
         // cooked items.
-        if (event.getSource().isFireDamage() && this.configuration.shouldDamageSourceCauseFire() && !event.getEntityLiving().isBurning() && !event.getEntity().world.isRemote) {
+        if (event.getSource().isFireDamage() && this.configuration.shouldDamageSourceCauseFire() && !event.getEntityLiving().isBurning() && !event.getEntity().worldObj.isRemote) {
             
             event.getEntityLiving().setFire(1);
         }
@@ -42,7 +42,7 @@ public class BetterBurning {
     public void onEntityJoinWorld (EntityJoinWorldEvent event) {
         
         // Allows skeletons to shoot flaming arrows when they are on fire.
-        if (this.configuration.shouldSkeletonsShootFireArrows() && event.getEntity() instanceof EntityArrow && !event.getEntity().world.isRemote) {
+        if (this.configuration.shouldSkeletonsShootFireArrows() && event.getEntity() instanceof EntityArrow && !event.getEntity().worldObj.isRemote) {
             
             final EntityArrow arrowEntity = (EntityArrow) event.getEntity();
             final Entity shooter = arrowEntity.shootingEntity;
@@ -58,7 +58,7 @@ public class BetterBurning {
     public void onLivingTick (LivingUpdateEvent event) {
         
         // If entity has fire resistance it will extinguish them right away when on fire.
-        if (this.configuration.shouldFireResExtinguish() && !event.getEntityLiving().world.isRemote && event.getEntityLiving().isBurning() && event.getEntityLiving().isPotionActive(MobEffects.FIRE_RESISTANCE)) {
+        if (this.configuration.shouldFireResExtinguish() && !event.getEntityLiving().worldObj.isRemote && event.getEntityLiving().isBurning() && event.getEntityLiving().isPotionActive(MobEffects.FIRE_RESISTANCE)) {
             
             event.getEntityLiving().extinguish();
         }
@@ -67,7 +67,7 @@ public class BetterBurning {
     @SubscribeEvent
     public void onLivingAttack (LivingAttackEvent event) {
         
-        if (this.configuration.shouldFireDamageSpread() && !event.getEntity().world.isRemote) {
+        if (this.configuration.shouldFireDamageSpread() && !event.getEntity().worldObj.isRemote) {
             
             final Entity sourceEntity = event.getSource().getEntity();
             
@@ -79,7 +79,7 @@ public class BetterBurning {
                 // Allows fire damage to spread from entity to entity
                 if (!(sourceLiving instanceof EntityZombie) && heldItem == null && sourceLiving.isBurning() && this.tryPercentage(this.configuration.getFireDamageSpreadChance())) {
                     
-                    final float damage = Math.max(1, event.getEntityLiving().world.getDifficultyForLocation(new BlockPos(event.getEntity())).getAdditionalDifficulty());
+                    final float damage = Math.max(1, event.getEntityLiving().worldObj.getDifficultyForLocation(new BlockPos(event.getEntity())).getAdditionalDifficulty());
                     event.getEntityLiving().setFire(2 * (int) damage);
                 }
                 
