@@ -4,7 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.AbstractSkeleton;
 import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
@@ -88,8 +87,7 @@ public class BetterBurning {
                 else if (heldItem.getItem() == Items.FLINT_AND_STEEL && this.configuration.shouldFlintAndSteelDoFireDamage()) {
                     
                     event.getEntityLiving().setFire(this.configuration.getFlintAndSteelFireDamage());
-                    final EntityPlayerMP player = sourceLiving instanceof EntityPlayerMP ? (EntityPlayerMP) sourceLiving : null;
-                    heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player);
+                    heldItem.attemptDamageItem(1, sourceLiving.getRNG());
                 }
             }
         }
