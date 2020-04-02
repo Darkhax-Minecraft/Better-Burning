@@ -37,6 +37,11 @@ public class Config {
         
         this.flintAndSteelDealsFireDamage = this.spec.getBoolean("ShouldFlintAndSteelDoFireDamage", "flintandsteel", true, "Should flint and steel deal fire damage when used as a weapon?");       
         this.flintAndSteelFireDamage = this.spec.getInt("flintAndSteelFireDamage", "flintandsteel", 3, 0, 4096, "How much fire damage should flint and steel do?");
+        
+        if (this.spec.hasChanged()) {
+        	
+        	this.spec.save();
+        }
     }
     
     public boolean shouldFireResExtinguish () {
