@@ -50,7 +50,7 @@ public class BetterBurning {
         if (this.configuration.shouldSkeletonsShootFireArrows() && event.getEntity() instanceof ArrowEntity && !event.getEntity().world.isRemote) {
             
             final ArrowEntity arrowEntity = (ArrowEntity) event.getEntity();
-            final Entity shooter = arrowEntity.getShooter();
+            final Entity shooter = arrowEntity.func_234616_v_();
             
             if (shooter instanceof AbstractSkeletonEntity && shooter.isBurning() && shooter.isAlive() && this.tryPercentage(this.configuration.getSkeletonFlameArrowChance())) {
                 
@@ -82,7 +82,7 @@ public class BetterBurning {
                 // Allows fire damage to spread from entity to entity
                 if (!(sourceLiving instanceof ZombieEntity) && heldItem.isEmpty() && sourceLiving.isBurning() && this.tryPercentage(this.configuration.getFireDamageSpreadChance())) {
                     
-                    final float damage = Math.max(1, event.getEntityLiving().world.getDifficultyForLocation(new BlockPos(event.getEntity())).getAdditionalDifficulty());
+                    final float damage = Math.max(1, event.getEntityLiving().world.getDifficultyForLocation(new BlockPos(event.getEntity().getPositionVec())).getAdditionalDifficulty());
                     event.getEntityLiving().setFire(2 * (int) damage);
                 }
                 

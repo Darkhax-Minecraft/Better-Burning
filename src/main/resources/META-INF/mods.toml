@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[31,)"
+loaderVersion="[32,)"
 issueTrackerURL="https://github.com/Darkhax-Minecraft/Better-Burning/issues"
 
 [[mods]]
@@ -16,13 +16,13 @@ ${mod_description}
 [[dependencies.betterburning]]
     modId="forge"
     mandatory=true
-    versionRange="[31,)"
+    versionRange="[32,)"
     ordering="NONE"
     side="SERVER"
 
 [[dependencies.betterburning]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.1]"
     ordering="NONE"
     side="SERVER"
