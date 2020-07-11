@@ -4,6 +4,7 @@ issueTrackerURL="https://github.com/Darkhax-Minecraft/Better-Burning/issues"
 
 [[mods]]
 modId="betterburning"
+updateJSONURL="https://updates.blamejared.com/get?n=betterburning&gv=1.16.1"
 version="${version}"
 displayName="${mod_name}"
 displayURL="${mod_download}"
