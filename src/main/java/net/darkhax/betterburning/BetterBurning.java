@@ -91,7 +91,11 @@ public class BetterBurning {
                     
                     event.getEntityLiving().setFire(this.configuration.getFlintAndSteelFireDamage());
                     final ServerPlayerEntity player = sourceLiving instanceof ServerPlayerEntity ? (ServerPlayerEntity) sourceLiving : null;
-                    heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player);
+                    
+                    if (!player.isCreative()) {
+                    	
+                        heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player);
+                    }
                 }
             }
         }
