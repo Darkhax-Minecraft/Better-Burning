@@ -23,6 +23,8 @@ public class Configuration {
     private final BooleanValue flintAndSteelDealsFireDamage;
     private final IntValue flintAndSteelFireDamage;
     
+    private final BooleanValue fireOverlay;
+    
     public Configuration() {
         
         final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -55,6 +57,8 @@ public class Configuration {
         builder.comment("How much fire damage should flint and steel do?");
         this.flintAndSteelFireDamage = builder.defineInRange("flintAndSteelFireDamage", 3, 0, Integer.MAX_VALUE);
         
+        builder.comment("Should the fire/burning HUD overlay be hidden if the player has fire immunity?");
+        this.fireOverlay = builder.define("hideFireOverlayWhenImmune", true);
         this.spec = builder.build();
     }
     
@@ -101,5 +105,10 @@ public class Configuration {
     public int getFlintAndSteelFireDamage () {
         
         return this.flintAndSteelFireDamage.get();
+    }
+    
+    public boolean hideFireOverlay () {
+        
+        return this.fireOverlay.get();
     }
 }

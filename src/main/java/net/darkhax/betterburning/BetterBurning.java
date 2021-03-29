@@ -10,6 +10,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderBlockOverlayEvent;
+import net.minecraftforge.client.event.RenderBlockOverlayEvent.OverlayType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -18,6 +21,7 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig.Type;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 @Mod("betterburning")
 public class BetterBurning {
@@ -32,12 +36,17 @@ public class BetterBurning {
         MinecraftForge.EVENT_BUS.addListener(this::onEntityJoinWorld);
         MinecraftForge.EVENT_BUS.addListener(this::onLivingTick);
         MinecraftForge.EVENT_BUS.addListener(this::onLivingAttack);
+        
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            
+            MinecraftForge.EVENT_BUS.addListener(this::onBlockOverlay);
+        }
     }
     
     private void onLivingDeath (LivingDeathEvent event) {
         
-        // Fixes some edge cases where fire damage sources won't cause mobs to drop their
-        // cooked items.
+        // Fixes some edge cases where fire damage sources won't cause mobs to drop
+        // their cooked items.
         if (event.getSource().isFireDamage() && this.configuration.shouldDamageSourceCauseFire() && !event.getEntityLiving().isBurning() && !event.getEntity().world.isRemote) {
             
             event.getEntityLiving().setFire(1);
@@ -61,7 +70,8 @@ public class BetterBurning {
     
     private void onLivingTick (LivingUpdateEvent event) {
         
-        // If entity has fire resistance it will extinguish them right away when on fire.
+        // If entity has fire resistance it will extinguish them right away when on
+        // fire.
         if (this.configuration.shouldFireResExtinguish() && !event.getEntityLiving().world.isRemote && event.getEntityLiving().isBurning() && event.getEntityLiving().isPotionActive(Effects.FIRE_RESISTANCE)) {
             
             event.getEntityLiving().extinguish();
@@ -93,11 +103,19 @@ public class BetterBurning {
                     final ServerPlayerEntity player = sourceLiving instanceof ServerPlayerEntity ? (ServerPlayerEntity) sourceLiving : null;
                     
                     if (player == null || !player.isCreative()) {
-                    	
+                        
                         heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player);
                     }
                 }
             }
+        }
+    }
+    
+    private void onBlockOverlay (RenderBlockOverlayEvent event) {
+        
+        if (event.getOverlayType() == OverlayType.FIRE && this.configuration.hideFireOverlay() && (event.getPlayer().isImmuneToFire() || event.getPlayer().isPotionActive(Effects.FIRE_RESISTANCE))) {
+            
+            event.setCanceled(true);
         }
     }
     
