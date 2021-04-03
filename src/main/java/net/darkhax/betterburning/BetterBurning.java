@@ -9,6 +9,7 @@ import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
@@ -104,7 +105,10 @@ public class BetterBurning {
                     
                     if (player == null || !player.isCreative()) {
                         
-                        heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player);
+                        if(heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player)) {
+                            player.sendBreakAnimation(Hand.MAIN_HAND);
+                            player.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
+                        }
                     }
                 }
             }
