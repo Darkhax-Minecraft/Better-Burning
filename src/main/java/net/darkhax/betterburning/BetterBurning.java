@@ -1,5 +1,7 @@
 package net.darkhax.betterburning;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.AbstractSkeletonEntity;
@@ -14,10 +16,12 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent.OverlayType;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig.Type;
@@ -36,10 +40,24 @@ public class BetterBurning {
         MinecraftForge.EVENT_BUS.addListener(this::onEntityJoinWorld);
         MinecraftForge.EVENT_BUS.addListener(this::onLivingTick);
         MinecraftForge.EVENT_BUS.addListener(this::onLivingAttack);
+        MinecraftForge.EVENT_BUS.addListener(this::onBlockBreak);
         
         if (FMLEnvironment.dist == Dist.CLIENT) {
             
             MinecraftForge.EVENT_BUS.addListener(this::onBlockOverlay);
+        }
+    }
+    
+    private void onBlockBreak (BlockEvent.BreakEvent event) {
+        
+        final BlockState state = event.getState();
+        
+        // Players get burned when they try to punch out a fire block.
+        final int burnTime = state.isIn(Blocks.FIRE) ? this.configuration.getFirePunchBurnTime() : state.isIn(Blocks.SOUL_FIRE) ? this.configuration.getSoulfirePunchBurnTime() : 0;
+        
+        if (burnTime > 0 && event.getPlayer() != null && !(event.getPlayer() instanceof FakePlayer)) {
+            
+            event.getPlayer().setFire(burnTime);
         }
     }
     

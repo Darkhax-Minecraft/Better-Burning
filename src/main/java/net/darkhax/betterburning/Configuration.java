@@ -25,6 +25,9 @@ public class Configuration {
     
     private final BooleanValue fireOverlay;
     
+    private final IntValue fireHitBurnTime;
+    private final IntValue soulfireHitBurnTime;
+    
     public Configuration() {
         
         final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -59,6 +62,13 @@ public class Configuration {
         
         builder.comment("Should the fire/burning HUD overlay be hidden if the player has fire immunity?");
         this.fireOverlay = builder.define("hideFireOverlayWhenImmune", true);
+        
+        builder.comment("How long should Fire burn players if they try to punch it out?");
+        this.fireHitBurnTime = builder.defineInRange("fireHitBurnTime", 1, 0, Integer.MAX_VALUE);
+        
+        builder.comment("How long should Soulfire burn players if they try to punch it out?");
+        this.soulfireHitBurnTime = builder.defineInRange("soulfireHitBurnTime", 2, 0, Integer.MAX_VALUE);
+        
         this.spec = builder.build();
     }
     
@@ -110,5 +120,15 @@ public class Configuration {
     public boolean hideFireOverlay () {
         
         return this.fireOverlay.get();
+    }
+    
+    public int getFirePunchBurnTime () {
+        
+        return this.fireHitBurnTime.get();
+    }
+    
+    public int getSoulfirePunchBurnTime () {
+        
+        return this.soulfireHitBurnTime.get();
     }
 }
