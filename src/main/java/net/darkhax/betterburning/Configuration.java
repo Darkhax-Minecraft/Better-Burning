@@ -30,6 +30,8 @@ public class Configuration {
     
     private final BooleanValue punchOutFlames;
     
+    private final BooleanValue extinguishWithBottle;
+    
     public Configuration() {
         
         final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -74,6 +76,8 @@ public class Configuration {
         builder.comment("Should players be able to put out fire blocks by punching them?");
         this.punchOutFlames = builder.define("punchOutFlames", true);
         
+        builder.comment("Can players put out fire with bottled water?");
+        this.extinguishWithBottle = builder.define("extinguishWithBottledWater", true);
         this.spec = builder.build();
     }
     
@@ -140,5 +144,10 @@ public class Configuration {
     public boolean canPunchOutFlames () {
         
         return this.punchOutFlames.get();
+    }
+    
+    public boolean canExtinguishWithBottledWater () {
+        
+        return this.extinguishWithBottle.get();
     }
 }

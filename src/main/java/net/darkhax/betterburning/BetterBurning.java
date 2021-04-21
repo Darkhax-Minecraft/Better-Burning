@@ -2,16 +2,21 @@ package net.darkhax.betterburning;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.AbstractSkeletonEntity;
 import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Effects;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionUtils;
+import net.minecraft.potion.Potions;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
@@ -22,11 +27,13 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 @Mod("betterburning")
 public class BetterBurning {
@@ -42,10 +49,33 @@ public class BetterBurning {
         MinecraftForge.EVENT_BUS.addListener(this::onLivingTick);
         MinecraftForge.EVENT_BUS.addListener(this::onLivingAttack);
         MinecraftForge.EVENT_BUS.addListener(this::onBlockBreak);
+        MinecraftForge.EVENT_BUS.addListener(this::rightClickBlockWithItem);
         
         if (FMLEnvironment.dist == Dist.CLIENT) {
             
             MinecraftForge.EVENT_BUS.addListener(this::onBlockOverlay);
+        }
+    }
+    
+    private void rightClickBlockWithItem (PlayerInteractEvent.RightClickBlock event) {
+        
+        if (this.configuration.canExtinguishWithBottledWater() && event.getPlayer() != null && !(event.getPlayer() instanceof FakePlayer)) {
+            
+            final BlockState state = event.getWorld().getBlockState(event.getPos());
+            final Block block = state.getBlock();
+            final ItemStack stack = event.getItemStack();
+            final Potion potion = PotionUtils.getPotionFromItem(stack);
+            
+            if (block == Blocks.FIRE || block == Blocks.SOUL_FIRE) {
+                
+                if (stack.getItem() == Items.POTION && Potions.WATER == potion && !event.getWorld().isRemote) {
+                    
+                    event.getWorld().setBlockState(event.getPos(), Blocks.AIR.getDefaultState());
+                    event.getWorld().playEvent((PlayerEntity) null, 1009, event.getPos(), 0);
+                    ItemHandlerHelper.giveItemToPlayer(event.getPlayer(), new ItemStack(Items.GLASS_BOTTLE));
+                    stack.shrink(1);
+                }
+            }
         }
     }
     
