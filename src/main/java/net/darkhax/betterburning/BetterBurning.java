@@ -17,6 +17,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
@@ -162,7 +163,10 @@ public class BetterBurning {
                     
                     if (player == null || !player.isCreative()) {
                         
-                        heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player);
+                        if(heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player)) {
+                            player.sendBreakAnimation(Hand.MAIN_HAND);
+                            player.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
+                        }
                     }
                 }
             }
