@@ -28,6 +28,8 @@ public class Configuration {
     private final IntValue fireHitBurnTime;
     private final IntValue soulfireHitBurnTime;
     
+    private final BooleanValue punchOutFlames;
+    
     public Configuration() {
         
         final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -68,6 +70,9 @@ public class Configuration {
         
         builder.comment("How long should Soulfire burn players if they try to punch it out?");
         this.soulfireHitBurnTime = builder.defineInRange("soulfireHitBurnTime", 2, 0, Integer.MAX_VALUE);
+        
+        builder.comment("Should players be able to put out fire blocks by punching them?");
+        this.punchOutFlames = builder.define("punchOutFlames", true);
         
         this.spec = builder.build();
     }
@@ -130,5 +135,10 @@ public class Configuration {
     public int getSoulfirePunchBurnTime () {
         
         return this.soulfireHitBurnTime.get();
+    }
+    
+    public boolean canPunchOutFlames () {
+        
+        return this.punchOutFlames.get();
     }
 }

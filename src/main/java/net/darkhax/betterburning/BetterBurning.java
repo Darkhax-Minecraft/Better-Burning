@@ -1,6 +1,7 @@
 package net.darkhax.betterburning;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -50,14 +51,23 @@ public class BetterBurning {
     
     private void onBlockBreak (BlockEvent.BreakEvent event) {
         
-        final BlockState state = event.getState();
-        
-        // Players get burned when they try to punch out a fire block.
-        final int burnTime = state.isIn(Blocks.FIRE) ? this.configuration.getFirePunchBurnTime() : state.isIn(Blocks.SOUL_FIRE) ? this.configuration.getSoulfirePunchBurnTime() : 0;
-        
-        if (burnTime > 0 && event.getPlayer() != null && !(event.getPlayer() instanceof FakePlayer)) {
+        if (event.getPlayer() != null && !(event.getPlayer() instanceof FakePlayer)) {
             
-            event.getPlayer().setFire(burnTime);
+            final Block block = event.getState().getBlock();
+            
+            // Players get burned when they try to punch out a fire block.
+            final int burnTime = block == Blocks.FIRE ? this.configuration.getFirePunchBurnTime() : block == Blocks.SOUL_FIRE ? this.configuration.getSoulfirePunchBurnTime() : 0;
+            
+            if (burnTime > 0) {
+                
+                event.getPlayer().setFire(burnTime);
+            }
+            
+            // Config to prevent punching out flames
+            if (block instanceof AbstractFireBlock && !this.configuration.canPunchOutFlames()) {
+                
+                event.setCanceled(true);
+            }
         }
     }
     
