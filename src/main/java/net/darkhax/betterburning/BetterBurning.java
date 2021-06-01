@@ -9,15 +9,14 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.AbstractSkeletonEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Effects;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
@@ -156,18 +155,10 @@ public class BetterBurning {
                 }
                 
                 // Allows flint and steel to do fire damage to mobs
-                else if (heldItem.getItem() == Items.FLINT_AND_STEEL && this.configuration.shouldFlintAndSteelDoFireDamage()) {
+                if (heldItem.getItem() == Items.FLINT_AND_STEEL && this.configuration.shouldFlintAndSteelDoFireDamage()) {
                     
                     event.getEntityLiving().setFire(this.configuration.getFlintAndSteelFireDamage());
-                    final ServerPlayerEntity player = sourceLiving instanceof ServerPlayerEntity ? (ServerPlayerEntity) sourceLiving : null;
-                    
-                    if (player == null || !player.isCreative()) {
-                        
-                        if(heldItem.attemptDamageItem(1, sourceLiving.getRNG(), player)) {
-                            player.sendBreakAnimation(Hand.MAIN_HAND);
-                            player.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
-                        }
-                    }
+                    heldItem.damageItem(1, sourceLiving, e -> e.sendBreakAnimation(EquipmentSlotType.MAINHAND));
                 }
             }
         }
