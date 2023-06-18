@@ -103,7 +103,7 @@ public class BetterBurningForge {
 
         // Fixes some edge cases where fire damage sources won't cause mobs to drop
         // their cooked items.
-        if (event.getSource().is(DamageTypeTags.IS_FIRE) && this.configuration.shouldDamageSourceCauseFire() && !event.getEntity().isOnFire() && !event.getEntity().level.isClientSide) {
+        if (event.getSource().is(DamageTypeTags.IS_FIRE) && this.configuration.shouldDamageSourceCauseFire() && !event.getEntity().isOnFire() && !event.getEntity().level().isClientSide) {
 
             event.getEntity().setSecondsOnFire(1);
         }
@@ -112,7 +112,7 @@ public class BetterBurningForge {
     private void onEntityJoinWorld(EntityJoinLevelEvent event) {
 
         // Allows skeletons to shoot flaming arrows when they are on fire.
-        if (this.configuration.shouldSkeletonsShootFireArrows() && event.getEntity() instanceof Arrow arrow && !event.getEntity().level.isClientSide) {
+        if (this.configuration.shouldSkeletonsShootFireArrows() && event.getEntity() instanceof Arrow arrow && !event.getEntity().level().isClientSide) {
 
             final Entity shooter = arrow.getOwner();
 
@@ -127,7 +127,7 @@ public class BetterBurningForge {
 
         // If entity has fire resistance it will extinguish them right away when on
         // fire.
-        if (this.configuration.shouldFireResExtinguish() && !event.getEntity().level.isClientSide && event.getEntity().isOnFire() && event.getEntity().hasEffect(MobEffects.FIRE_RESISTANCE)) {
+        if (this.configuration.shouldFireResExtinguish() && !event.getEntity().level().isClientSide && event.getEntity().isOnFire() && event.getEntity().hasEffect(MobEffects.FIRE_RESISTANCE)) {
 
             event.getEntity().extinguishFire();
         }
@@ -135,7 +135,7 @@ public class BetterBurningForge {
 
     private void onLivingAttack(LivingAttackEvent event) {
 
-        if (this.configuration.shouldFireDamageSpread() && !event.getEntity().level.isClientSide) {
+        if (this.configuration.shouldFireDamageSpread() && !event.getEntity().level().isClientSide) {
 
             final Entity sourceEntity = event.getSource().getEntity();
 
@@ -146,7 +146,7 @@ public class BetterBurningForge {
                 // Allows fire damage to spread from entity to entity
                 if (!(sourceLiving instanceof Zombie) && heldItem.isEmpty() && sourceLiving.isOnFire() && this.tryPercentage(this.configuration.getFireDamageSpreadChance())) {
 
-                    final float damage = Math.max(1, event.getEntity().level.getCurrentDifficultyAt(event.getEntity().blockPosition()).getEffectiveDifficulty());
+                    final float damage = Math.max(1, event.getEntity().level().getCurrentDifficultyAt(event.getEntity().blockPosition()).getEffectiveDifficulty());
                     event.getEntity().setSecondsOnFire(2 * (int) damage);
                 }
 
