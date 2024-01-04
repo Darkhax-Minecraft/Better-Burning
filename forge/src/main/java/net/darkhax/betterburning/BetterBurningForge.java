@@ -1,6 +1,7 @@
 package net.darkhax.betterburning;
 
 import net.darkhax.betterburning.config.ConfigForge;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -20,7 +21,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -57,7 +57,7 @@ public class BetterBurningForge {
 
     private void rightClickBlockWithItem(PlayerInteractEvent.RightClickBlock event) {
 
-        if (this.configuration.canExtinguishWithBottledWater() && event.getEntity() != null && !(event.getEntity() instanceof FakePlayer)) {
+        if (this.configuration.canExtinguishWithBottledWater() && event.getEntity() != null && event.getEntity().getClass() == ServerPlayer.class) {
 
             final BlockState state = event.getLevel().getBlockState(event.getPos());
             final Block block = state.getBlock();
@@ -79,7 +79,7 @@ public class BetterBurningForge {
 
     private void onBlockBreak(BlockEvent.BreakEvent event) {
 
-        if (event.getPlayer() != null && !(event.getPlayer() instanceof FakePlayer)) {
+        if (event.getPlayer() != null && event.getPlayer().getClass() == ServerPlayer.class) {
 
             final Block block = event.getState().getBlock();
 
