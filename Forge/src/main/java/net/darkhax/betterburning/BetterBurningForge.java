@@ -1,7 +1,6 @@
 package net.darkhax.betterburning;
 
 import net.darkhax.betterburning.config.ConfigForge;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,15 +17,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderBlockScreenEffectEvent;
+import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig.Type;
@@ -59,18 +58,18 @@ public class BetterBurningForge {
 
         if (this.configuration.canExtinguishWithBottledWater() && event.getEntity() != null && !(event.getEntity() instanceof FakePlayer)) {
 
-            final BlockState state = event.getLevel().getBlockState(event.getPos());
+            final BlockState state = event.getWorld().getBlockState(event.getPos());
             final Block block = state.getBlock();
             final ItemStack stack = event.getItemStack();
             final Potion potion = PotionUtils.getPotion(stack);
 
             if (block == Blocks.FIRE || block == Blocks.SOUL_FIRE) {
 
-                if (stack.getItem() == Items.POTION && Potions.WATER == potion && !event.getLevel().isClientSide) {
+                if (stack.getItem() == Items.POTION && Potions.WATER == potion && !event.getWorld().isClientSide) {
 
-                    event.getLevel().setBlockAndUpdate(event.getPos(), Blocks.AIR.defaultBlockState());
-                    event.getLevel().levelEvent(null, 1009, event.getPos(), 0);
-                    ItemHandlerHelper.giveItemToPlayer(event.getEntity(), new ItemStack(Items.GLASS_BOTTLE));
+                    event.getWorld().setBlockAndUpdate(event.getPos(), Blocks.AIR.defaultBlockState());
+                    event.getWorld().levelEvent(null, 1009, event.getPos(), 0);
+                    ItemHandlerHelper.giveItemToPlayer(event.getPlayer(), new ItemStack(Items.GLASS_BOTTLE));
                     stack.shrink(1);
                 }
             }
@@ -103,13 +102,13 @@ public class BetterBurningForge {
 
         // Fixes some edge cases where fire damage sources won't cause mobs to drop
         // their cooked items.
-        if (event.getSource().is(DamageTypeTags.IS_FIRE) && this.configuration.shouldDamageSourceCauseFire() && !event.getEntity().isOnFire() && !event.getEntity().level.isClientSide) {
+        if (event.getSource().isFire() && this.configuration.shouldDamageSourceCauseFire() && !event.getEntity().isOnFire() && !event.getEntity().level.isClientSide) {
 
             event.getEntity().setSecondsOnFire(1);
         }
     }
 
-    private void onEntityJoinWorld(EntityJoinLevelEvent event) {
+    private void onEntityJoinWorld(EntityJoinWorldEvent event) {
 
         // Allows skeletons to shoot flaming arrows when they are on fire.
         if (this.configuration.shouldSkeletonsShootFireArrows() && event.getEntity() instanceof Arrow arrow && !event.getEntity().level.isClientSide) {
@@ -123,13 +122,13 @@ public class BetterBurningForge {
         }
     }
 
-    private void onLivingTick(LivingEvent.LivingTickEvent event) {
+    private void onLivingTick(LivingEvent.LivingUpdateEvent event) {
 
         // If entity has fire resistance it will extinguish them right away when on
         // fire.
-        if (this.configuration.shouldFireResExtinguish() && !event.getEntity().level.isClientSide && event.getEntity().isOnFire() && event.getEntity().hasEffect(MobEffects.FIRE_RESISTANCE)) {
+        if (this.configuration.shouldFireResExtinguish() && !event.getEntity().level.isClientSide && event.getEntity().isOnFire() && event.getEntityLiving().hasEffect(MobEffects.FIRE_RESISTANCE)) {
 
-            event.getEntity().extinguishFire();
+            event.getEntityLiving().clearFire();
         }
     }
 
@@ -159,9 +158,9 @@ public class BetterBurningForge {
         }
     }
 
-    private void onBlockOverlay(RenderBlockScreenEffectEvent event) {
+    private void onBlockOverlay(RenderBlockOverlayEvent event) {
 
-        if (event.getOverlayType() == RenderBlockScreenEffectEvent.OverlayType.FIRE && this.configuration.hideFireOverlay() && (event.getPlayer().fireImmune() || event.getPlayer().hasEffect(MobEffects.FIRE_RESISTANCE))) {
+        if (event.getOverlayType() == RenderBlockOverlayEvent.OverlayType.FIRE && this.configuration.hideFireOverlay() && (event.getPlayer().fireImmune() || event.getPlayer().hasEffect(MobEffects.FIRE_RESISTANCE))) {
 
             event.setCanceled(true);
         }
